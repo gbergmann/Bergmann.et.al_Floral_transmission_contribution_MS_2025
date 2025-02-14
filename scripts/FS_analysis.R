@@ -281,8 +281,416 @@ Fig2A <- Upset_16S_all2 + theme(axis.title = element_text(size=20), axis.text = 
 Fig2A 
 
 #### Pairwise comparisons of taxa overlaps (Fig. 2B, Fig. S2) ####
+bact.rel.meta <- sample_data(bact.rel.phy) %>% data.frame()
+bact.rel.meta2 <- bact.rel.meta
+bact.rel.meta2$Plant_rep <- c('1','10','3','4','5','6','8',
+                              '1','10','3','4','5','6','7','8',
+                              '1','2','3','4','5','6','8','9',
+                              '1','10','2','4','6','7','8','9',
+                              '1','2','3','4','5','6','7','8',
+                              '1','10','2','3','4','5','6','7','8','9',
+                              '10','2','3','4','5','6','7',
+                              '1','2','3','5','6','9')
+sample_data(bact.rel.phy) <- bact.rel.meta2
 
-#### Partitioning beta-diversity for individual sample pairs (Fig. S3)  ####
+# SJ1.1
+SJ1.1.phy <- subset_samples(bact.rel.phy, Updated_Field_Name == "SJ1"&Plant_rep == "1") 
+SJ1.1.phy <- prune_taxa(taxa_sums(SJ1.1.phy)>0, SJ1.1.phy)
+
+#Extract count datasets from phyloseq
+count_SJ1.1_all <- t(otu_table(SJ1.1.phy))
+#Transform in binary matrix
+count_SJ1.1_all[count_SJ1.1_all> 0] <- 1
+#Convert to dataframe
+df_SJ1.1_all <- as.data.frame(count_SJ1.1_all)
+#Read abundance per ASV
+SJ1.1_rel.abu <- data.frame(taxa_sums(SJ1.1.phy))
+SJ1.1_rel.abu$log <- log10(SJ1.1_rel.abu$taxa_sums.SJ1.1.phy.)
+#Merge ASV dataframe and ASV abundance
+df_SJ1.1_all_upset <-merge.data.frame(df_SJ1.1_all, SJ1.1_rel.abu, by="row.names",
+                                      all.x=TRUE)
+#Append taxonomy to upset dataframe
+df_SJ1.1_taxa <- tax_table(SJ1.1.phy) %>% data.frame() %>% rownames_to_column()
+names(df_SJ1.1_taxa)[names(df_SJ1.1_taxa)=="rowname"] <- "Row.names"
+
+df_SJ1.1_all_upset2 <- full_join(df_SJ1.1_all_upset, df_SJ1.1_taxa, by="Row.names")
+
+#Upset graph will all comparisons
+Upset_SJ1.1_all <- UpSetR::upset(df_SJ1.1_all_upset2,
+                                 nsets = 2, 
+                                 nintersects = NA,
+                                 order.by = "freq",
+                                 mainbar.y.label = "Number of ASVs",
+                                 sets.x.label="total tissue ASV richness",
+                                 decreasing ="TRUE")
+Upset_SJ1.1_all # 17 ASVs out of 215 stigma, 72 seed
+
+# SJ1.2
+SJ1.2.phy <- subset_samples(bact.rel.phy, Updated_Field_Name == "SJ1"&Plant_rep == "2") 
+SJ1.2.phy <- prune_taxa(taxa_sums(SJ1.2.phy)>0, SJ1.2.phy)
+
+#Extract count datasets from phyloseq
+count_SJ1.2_all <- t(otu_table(SJ1.2.phy))
+#Transform in binary matrix
+count_SJ1.2_all[count_SJ1.2_all> 0] <- 1
+#Convert to dataframe
+df_SJ1.2_all <- as.data.frame(count_SJ1.2_all)
+#Read abundance per ASV
+SJ1.2_rel.abu <- data.frame(taxa_sums(SJ1.2.phy))
+SJ1.2_rel.abu$log <- log10(SJ1.2_rel.abu$taxa_sums.SJ1.2.phy.)
+#Merge ASV dataframe and ASV abundance
+df_SJ1.2_all_upset <-merge.data.frame(df_SJ1.2_all, SJ1.2_rel.abu, by="row.names",
+                                      all.x=TRUE)
+#Append taxonomy to upset dataframe
+df_SJ1.2_taxa <- tax_table(SJ1.2.phy) %>% data.frame() %>% rownames_to_column()
+names(df_SJ1.2_taxa)[names(df_SJ1.2_taxa)=="rowname"] <- "Row.names"
+
+df_SJ1.2_all_upset2 <- full_join(df_SJ1.2_all_upset, df_SJ1.2_taxa, by="Row.names")
+
+#Upset graph will all comparisons
+Upset_SJ1.2_all <- UpSetR::upset(df_SJ1.2_all_upset2,
+                                 nsets = 2,
+                                 nintersects = NA,
+                                 order.by = "freq",
+                                 mainbar.y.label = "Number of ASVs",
+                                 sets.x.label="total tissue ASV richness",
+                                 decreasing ="TRUE")
+Upset_SJ1.2_all # 11 ASVs out of 176 stigma, 87 seed
+
+# SJ1.3 
+SJ1.3.phy <- subset_samples(bact.rel.phy, Updated_Field_Name == "SJ1"&Plant_rep == "3") 
+SJ1.3.phy <- prune_taxa(taxa_sums(SJ1.3.phy)>0, SJ1.3.phy)
+
+#Extract count datasets from phyloseq
+count_SJ1.3_all <- t(otu_table(SJ1.3.phy))
+#Transform in binary matrix
+count_SJ1.3_all[count_SJ1.3_all> 0] <- 1
+#Convert to dataframe
+df_SJ1.3_all <- as.data.frame(count_SJ1.3_all)
+#Read abundance per ASV
+SJ1.3_rel.abu <- data.frame(taxa_sums(SJ1.3.phy))
+SJ1.3_rel.abu$log <- log10(SJ1.3_rel.abu$taxa_sums.SJ1.3.phy.)
+#Merge ASV dataframe and ASV abundance
+df_SJ1.3_all_upset <-merge.data.frame(df_SJ1.3_all, SJ1.3_rel.abu, by="row.names",
+                                      all.x=TRUE)
+#Append taxonomy to upset dataframe
+df_SJ1.3_taxa <- tax_table(SJ1.3.phy) %>% data.frame() %>% rownames_to_column()
+names(df_SJ1.3_taxa)[names(df_SJ1.3_taxa)=="rowname"] <- "Row.names"
+
+df_SJ1.3_all_upset2 <- full_join(df_SJ1.3_all_upset, df_SJ1.3_taxa, by="Row.names")
+
+#Upset graph will all comparisons
+Upset_SJ1.3_all <- UpSetR::upset(df_SJ1.3_all_upset2,
+                                 nsets = 2, 
+                                 nintersects = NA,
+                                 order.by = "freq",
+                                 mainbar.y.label = "Number of ASVs",
+                                 sets.x.label="total tissue ASV richness",
+                                 decreasing ="TRUE")
+Upset_SJ1.3_all # 41 ASVs out of 225 stigma, 222 seed
+
+# SJ1.4
+SJ1.4.phy <- subset_samples(bact.rel.phy, Updated_Field_Name == "SJ1"&Plant_rep == "4") 
+SJ1.4.phy <- prune_taxa(taxa_sums(SJ1.4.phy)>0, SJ1.4.phy)
+
+#Extract count datasets from phyloseq
+count_SJ1.4_all <- t(otu_table(SJ1.4.phy))
+#Transform in binary matrix
+count_SJ1.4_all[count_SJ1.4_all> 0] <- 1
+#Convert to dataframe
+df_SJ1.4_all <- as.data.frame(count_SJ1.4_all)
+#Read abundance per ASV
+SJ1.4_rel.abu <- data.frame(taxa_sums(SJ1.4.phy))
+SJ1.4_rel.abu$log <- log10(SJ1.4_rel.abu$taxa_sums.SJ1.4.phy.)
+#Merge ASV dataframe and ASV abundance
+df_SJ1.4_all_upset <-merge.data.frame(df_SJ1.4_all, SJ1.4_rel.abu, by="row.names",
+                                      all.x=TRUE)
+#Append taxonomy to upset dataframe
+df_SJ1.4_taxa <- tax_table(SJ1.4.phy) %>% data.frame() %>% rownames_to_column()
+names(df_SJ1.4_taxa)[names(df_SJ1.4_taxa)=="rowname"] <- "Row.names"
+
+df_SJ1.4_all_upset2 <- full_join(df_SJ1.4_all_upset, df_SJ1.4_taxa, by="Row.names")
+
+# Upset graph will all comparisons
+Upset_SJ1.4_all <- UpSetR::upset(df_SJ1.4_all_upset2,
+                                 nsets = 2, 
+                                 nintersects = NA,
+                                 order.by = "freq",
+                                 mainbar.y.label = "Number of ASVs",
+                                 sets.x.label="total tissue ASV richness",
+                                 decreasing ="TRUE")
+Upset_SJ1.4_all # 13 ASVs out of 99 stigma, 45 seed
+
+# SJ1.5 
+SJ1.5.phy <- subset_samples(bact.rel.phy, Updated_Field_Name == "SJ1"&Plant_rep == "5") 
+SJ1.5.phy <- prune_taxa(taxa_sums(SJ1.5.phy)>0, SJ1.5.phy)
+
+#Extract count datasets from phyloseq
+count_SJ1.5_all <- t(otu_table(SJ1.5.phy))
+#Transform in binary matrix
+count_SJ1.5_all[count_SJ1.5_all> 0] <- 1
+#Convert to dataframe
+df_SJ1.5_all <- as.data.frame(count_SJ1.5_all)
+#Read abundance per ASV
+SJ1.5_rel.abu <- data.frame(taxa_sums(SJ1.5.phy))
+SJ1.5_rel.abu$log <- log10(SJ1.5_rel.abu$taxa_sums.SJ1.5.phy.)
+#Merge ASV dataframe and ASV abundance
+df_SJ1.5_all_upset <-merge.data.frame(df_SJ1.5_all, SJ1.5_rel.abu, by="row.names",
+                                      all.x=TRUE)
+#Append taxonomy to upset dataframe
+df_SJ1.5_taxa <- tax_table(SJ1.5.phy) %>% data.frame() %>% rownames_to_column()
+names(df_SJ1.5_taxa)[names(df_SJ1.5_taxa)=="rowname"] <- "Row.names"
+
+df_SJ1.5_all_upset2 <- full_join(df_SJ1.5_all_upset, df_SJ1.5_taxa, by="Row.names")
+
+#Upset graph will all comparisons
+Upset_SJ1.5_all <- UpSetR::upset(df_SJ1.5_all_upset2,
+                                 nsets = 2, 
+                                 nintersects = NA,
+                                 order.by = "freq",
+                                 mainbar.y.label = "Number of ASVs",
+                                 sets.x.label="total tissue ASV richness",
+                                 decreasing ="TRUE")
+Upset_SJ1.5_all # 7 ASVs out of 37 stigma, 78 seed
+
+# SJ1.6
+SJ1.6.phy <- subset_samples(bact.rel.phy, Updated_Field_Name == "SJ1"&Plant_rep == "6") 
+SJ1.6.phy <- prune_taxa(taxa_sums(SJ1.6.phy)>0, SJ1.6.phy)
+
+#Extract count datasets from phyloseq
+count_SJ1.6_all <- t(otu_table(SJ1.6.phy))
+#Transform in binary matrix
+count_SJ1.6_all[count_SJ1.6_all> 0] <- 1
+#Convert to dataframe
+df_SJ1.6_all <- as.data.frame(count_SJ1.6_all)
+#Read abundance per ASV
+SJ1.6_rel.abu <- data.frame(taxa_sums(SJ1.6.phy))
+SJ1.6_rel.abu$log <- log10(SJ1.6_rel.abu$taxa_sums.SJ1.6.phy.)
+#Merge ASV dataframe and ASV abundance
+df_SJ1.6_all_upset <-merge.data.frame(df_SJ1.6_all, SJ1.6_rel.abu, by="row.names",
+                                      all.x=TRUE)
+#Append taxonomy to upset dataframe
+df_SJ1.6_taxa <- tax_table(SJ1.6.phy) %>% data.frame() %>% rownames_to_column()
+names(df_SJ1.6_taxa)[names(df_SJ1.6_taxa)=="rowname"] <- "Row.names"
+
+df_SJ1.6_all_upset2 <- full_join(df_SJ1.6_all_upset, df_SJ1.6_taxa, by="Row.names")
+
+#Upset graph will all comparisons
+Upset_SJ1.6_all <- UpSetR::upset(df_SJ1.6_all_upset2,
+                                 nsets = 2, 
+                                 nintersects = NA,
+                                 order.by = "freq",
+                                 mainbar.y.label = "Number of ASVs",
+                                 sets.x.label="total tissue ASV richness",
+                                 decreasing ="TRUE", 
+                                 text.scale = 2)
+Upset_SJ1.6_all # 16 ASVs out of 251 stigma, 114 seed
+
+# SJ1.7
+SJ1.7.phy <- subset_samples(bact.rel.phy, Updated_Field_Name == "SJ1"&Plant_rep == "7") 
+SJ1.7.phy <- prune_taxa(taxa_sums(SJ1.7.phy)>0, SJ1.7.phy)
+
+#Extract count datasets from phyloseq
+count_SJ1.7_all <- t(otu_table(SJ1.7.phy))
+#Transform in binary matrix
+count_SJ1.7_all[count_SJ1.7_all> 0] <- 1
+#Convert to dataframe
+df_SJ1.7_all <- as.data.frame(count_SJ1.7_all)
+#Read abundance per ASV
+SJ1.7_rel.abu <- data.frame(taxa_sums(SJ1.7.phy))
+SJ1.7_rel.abu$log <- log10(SJ1.7_rel.abu$taxa_sums.SJ1.7.phy.)
+#Merge ASV dataframe and ASV abundance
+df_SJ1.7_all_upset <-merge.data.frame(df_SJ1.7_all, SJ1.7_rel.abu, by="row.names",
+                                      all.x=TRUE)
+#Append taxonomy to upset dataframe
+df_SJ1.7_taxa <- tax_table(SJ1.7.phy) %>% data.frame() %>% rownames_to_column()
+names(df_SJ1.7_taxa)[names(df_SJ1.7_taxa)=="rowname"] <- "Row.names"
+
+df_SJ1.7_all_upset2 <- full_join(df_SJ1.7_all_upset, df_SJ1.7_taxa, by="Row.names")
+
+#Upset graph will all comparisons
+Upset_SJ1.7_all <- UpSetR::upset(df_SJ1.7_all_upset2,
+                                 nsets = 2, 
+                                 nintersects = NA,
+                                 order.by = "freq",
+                                 mainbar.y.label = "Number of ASVs",
+                                 sets.x.label="total tissue ASV richness",
+                                 decreasing ="TRUE", 
+                                 text.scale = 2)
+Upset_SJ1.7_all # 9 ASVs out of 47 stigma, 140 seed
+
+# SJ1.8
+SJ1.8.phy <- subset_samples(bact.rel.phy, Updated_Field_Name == "SJ1"&Plant_rep == "8") 
+SJ1.8.phy <- prune_taxa(taxa_sums(SJ1.8.phy)>0, SJ1.8.phy)
+
+#Extract count datasets from phyloseq
+count_SJ1.8_all <- t(otu_table(SJ1.8.phy))
+#Transform in binary matrix
+count_SJ1.8_all[count_SJ1.8_all> 0] <- 1
+#Convert to dataframe
+df_SJ1.8_all <- as.data.frame(count_SJ1.8_all)
+#Read abundance per ASV
+SJ1.8_rel.abu <- data.frame(taxa_sums(SJ1.8.phy))
+SJ1.8_rel.abu$log <- log10(SJ1.8_rel.abu$taxa_sums.SJ1.8.phy.)
+#Merge ASV dataframe and ASV abundance
+df_SJ1.8_all_upset <-merge.data.frame(df_SJ1.8_all, SJ1.8_rel.abu, by="row.names",
+                                      all.x=TRUE)
+#Append taxonomy to upset dataframe
+df_SJ1.8_taxa <- tax_table(SJ1.8.phy) %>% data.frame() %>% rownames_to_column()
+names(df_SJ1.8_taxa)[names(df_SJ1.8_taxa)=="rowname"] <- "Row.names"
+
+df_SJ1.8_all_upset2 <- full_join(df_SJ1.8_all_upset, df_SJ1.8_taxa, by="Row.names")
+
+#Upset graph will all comparisons
+Upset_SJ1.8_all <- UpSetR::upset(df_SJ1.8_all_upset2,
+                                 nsets = 2, 
+                                 nintersects = NA,
+                                 order.by = "freq",
+                                 mainbar.y.label = "Number of ASVs",
+                                 sets.x.label="total tissue ASV richness",
+                                 decreasing ="TRUE", 
+                                 text.scale = 2)
+Upset_SJ1.8_all # 2 ASVs out of 25 stigma, 137 seed
+
+
+# SJ2.2 
+SJ2.2.phy <- subset_samples(bact.rel.phy, Updated_Field_Name == "SJ2"&Plant_rep == "2") 
+SJ2.2.phy <- prune_taxa(taxa_sums(SJ2.2.phy)>0, SJ2.2.phy)
+
+#Extract count datasets from phyloseq
+count_SJ2.2_all <- t(otu_table(SJ2.2.phy))
+#Transform in binary matrix
+count_SJ2.2_all[count_SJ2.2_all> 0] <- 1
+#Convert to dataframe
+df_SJ2.2_all <- as.data.frame(count_SJ2.2_all)
+#Read abundance per ASV
+SJ2.2_rel.abu <- data.frame(taxa_sums(SJ2.2.phy))
+SJ2.2_rel.abu$log <- log10(SJ2.2_rel.abu$taxa_sums.SJ2.2.phy.)
+#Merge ASV dataframe and ASV abundance
+df_SJ2.2_all_upset <-merge.data.frame(df_SJ2.2_all, SJ2.2_rel.abu, by="row.names",
+                                      all.x=TRUE)
+#Append taxonomy to upset dataframe
+df_SJ2.2_taxa <- tax_table(SJ2.2.phy) %>% data.frame() %>% rownames_to_column()
+names(df_SJ2.2_taxa)[names(df_SJ2.2_taxa)=="rowname"] <- "Row.names"
+
+df_SJ2.2_all_upset2 <- full_join(df_SJ2.2_all_upset, df_SJ2.2_taxa, by="Row.names")
+
+#Upset graph will all comparisons
+Upset_SJ2.2_all <- UpSetR::upset(df_SJ2.2_all_upset2,
+                                 nsets = 2, 
+                                 nintersects = NA,
+                                 order.by = "freq",
+                                 mainbar.y.label = "Number of ASVs",
+                                 sets.x.label="total tissue ASV richness",
+                                 decreasing ="TRUE", 
+                                 text.scale = 2)
+Upset_SJ2.2_all # 12 ASVs out of 287 stigma, 75 seed
+
+# SJ2.3
+SJ2.3.phy <- subset_samples(bact.rel.phy, Updated_Field_Name == "SJ2"&Plant_rep == "3") 
+SJ2.3.phy <- prune_taxa(taxa_sums(SJ2.3.phy)>0, SJ2.3.phy)
+
+#Extract count datasets from phyloseq
+count_SJ2.3_all <- t(otu_table(SJ2.3.phy))
+#Transform in binary matrix
+count_SJ2.3_all[count_SJ2.3_all> 0] <- 1
+#Convert to dataframe
+df_SJ2.3_all <- as.data.frame(count_SJ2.3_all)
+#Read abundance per ASV
+SJ2.3_rel.abu <- data.frame(taxa_sums(SJ2.3.phy))
+SJ2.3_rel.abu$log <- log10(SJ2.3_rel.abu$taxa_sums.SJ2.3.phy.)
+#Merge ASV dataframe and ASV abundance
+df_SJ2.3_all_upset <-merge.data.frame(df_SJ2.3_all, SJ2.3_rel.abu, by="row.names",
+                                      all.x=TRUE)
+#Append taxonomy to upset dataframe
+df_SJ2.3_taxa <- tax_table(SJ2.3.phy) %>% data.frame() %>% rownames_to_column()
+names(df_SJ2.3_taxa)[names(df_SJ2.3_taxa)=="rowname"] <- "Row.names"
+
+df_SJ2.3_all_upset2 <- full_join(df_SJ2.3_all_upset, df_SJ2.3_taxa, by="Row.names")
+
+#Upset graph will all comparisons
+Upset_SJ2.3_all <- UpSetR::upset(df_SJ2.3_all_upset2,
+                                 nsets = 2, 
+                                 nintersects = NA,
+                                 order.by = "freq",
+                                 mainbar.y.label = "Number of ASVs",
+                                 sets.x.label="total tissue ASV richness",
+                                 decreasing ="TRUE", 
+                                 text.scale = 2)
+Upset_SJ2.3_all # 11 ASVs out of 121 stigma, 66 seed
+
+# SJ2.5
+SJ2.5.phy <- subset_samples(bact.rel.phy, Updated_Field_Name == "SJ2"&Plant_rep == "5") 
+SJ2.5.phy <- prune_taxa(taxa_sums(SJ2.5.phy)>0, SJ2.5.phy)
+
+#Extract count datasets from phyloseq
+count_SJ2.5_all <- t(otu_table(SJ2.5.phy))
+#Transform in binary matrix
+count_SJ2.5_all[count_SJ2.5_all> 0] <- 1
+#Convert to dataframe
+df_SJ2.5_all <- as.data.frame(count_SJ2.5_all)
+#Read abundance per ASV
+SJ2.5_rel.abu <- data.frame(taxa_sums(SJ2.5.phy))
+SJ2.5_rel.abu$log <- log10(SJ2.5_rel.abu$taxa_sums.SJ2.5.phy.)
+#Merge ASV dataframe and ASV abundance
+df_SJ2.5_all_upset <-merge.data.frame(df_SJ2.5_all, SJ2.5_rel.abu, by="row.names",
+                                      all.x=TRUE)
+#Append taxonomy to upset dataframe
+df_SJ2.5_taxa <- tax_table(SJ2.5.phy) %>% data.frame() %>% rownames_to_column()
+names(df_SJ2.5_taxa)[names(df_SJ2.5_taxa)=="rowname"] <- "Row.names"
+
+df_SJ2.5_all_upset2 <- full_join(df_SJ2.5_all_upset, df_SJ2.5_taxa, by="Row.names")
+
+#Upset graph will all comparisons
+Upset_SJ2.5_all <- UpSetR::upset(df_SJ2.5_all_upset2,
+                                 nsets = 2, 
+                                 nintersects = NA,
+                                 order.by = "freq",
+                                 mainbar.y.label = "Number of ASVs",
+                                 sets.x.label="total tissue ASV richness",
+                                 decreasing ="TRUE", 
+                                 text.scale = 2)
+Upset_SJ2.5_all # 18 ASVs out of 106 stigma, 130 seed
+
+# SJ2.6
+SJ2.6.phy <- subset_samples(bact.rel.phy, Updated_Field_Name == "SJ2"&Plant_rep == "6") 
+SJ2.6.phy <- prune_taxa(taxa_sums(SJ2.6.phy)>0, SJ2.6.phy)
+
+#Extract count datasets from phyloseq
+count_SJ2.6_all <- t(otu_table(SJ2.6.phy))
+#Transform in binary matrix
+count_SJ2.6_all[count_SJ2.6_all> 0] <- 1
+#Convert to dataframe
+df_SJ2.6_all <- as.data.frame(count_SJ2.6_all)
+#Read abundance per ASV
+SJ2.6_rel.abu <- data.frame(taxa_sums(SJ2.6.phy))
+SJ2.6_rel.abu$log <- log10(SJ2.6_rel.abu$taxa_sums.SJ2.6.phy.)
+#Merge ASV dataframe and ASV abundance
+df_SJ2.6_all_upset <-merge.data.frame(df_SJ2.6_all, SJ2.6_rel.abu, by="row.names",
+                                      all.x=TRUE)
+#Append taxonomy to upset dataframe
+df_SJ2.6_taxa <- tax_table(SJ2.6.phy) %>% data.frame() %>% rownames_to_column()
+names(df_SJ2.6_taxa)[names(df_SJ2.6_taxa)=="rowname"] <- "Row.names"
+
+df_SJ2.6_all_upset2 <- full_join(df_SJ2.6_all_upset, df_SJ2.6_taxa, by="Row.names")
+
+#Upset graph will all comparisons
+Upset_SJ2.6_all <- UpSetR::upset(df_SJ2.6_all_upset2,
+                                 nsets = 2, 
+                                 nintersects = NA,
+                                 order.by = "freq",
+                                 mainbar.y.label = "Number of ASVs",
+                                 sets.x.label="total tissue ASV richness",
+                                 decreasing ="TRUE", 
+                                 text.scale = 2)
+Upset_SJ2.6_all # 18 ASVs out of 210 stigma, 50 seed
+
+# Co1.1
+Co1.1.phy <- subset_samples(bact.rel.phy, Updated_Field_Name == "Co1"&Plant_rep == "1") 
+Co1.1.phy <- prune_taxa(taxa_sums(Co1.1.phy)>0, Co1.1.phy)
+
+
+#### Partitioning beta-diversity for individual sample pairs (Fig. S3) ####
 
 #### visualizing most abundant shared + unique genera (Fig. 3A, Fig. S4) ####
 # shared taxa
@@ -317,6 +725,67 @@ Fig3A <- plot_composition(merged.share.phy,
 Fig3A 
 
 # taxa unique to stigmas (Fig. S4A)
+stigma.only.phy <- subset_taxa(bact.rel.phy, stigma=="TRUE"&seed_pooled=="FALSE")
+stigma.only.phy <- prune_samples(sample_sums(stigma.only.phy)>0, stigma.only.phy)
+
+merged.stigma.phy <- stigma.only.phy %>%
+  aggregate_top_taxa2(., 20, "genus.x")
+merged.stigma.taxa <- tax_table(merged.stigma.phy) %>% as.data.frame()
+
+# need to make a manual color-scheme where colors are shared for overlapping genera, but others are unique
+kelly <- distinct_palette(pal = "kelly")
+scales::show_col(kelly)
+
+FigS4A <- plot_composition(merged.stigma.phy, 
+                           verbose = F, otu.sort = "abundance", group_by = "tissue_type") +
+  scale_fill_manual(values = c("#A6CEE3", "#FB9A99", "#f3c300", "#875692", "#f38400","#be0032",
+                               "#c2b280","#848482","#008856","#e68fac", "#1F78B4","#f99379",
+                               "#604e97","#f6a600","#b3446c","#666666","#dcd300","#882d17",
+                               "#8db600","#654522","#e25822","#2b3d26")) + # Corynebacterium is 16
+  labs(x="Sample", y="Relative abundance (%)", fill="Genus") +
+  ylim(0,100)+
+  theme_light()+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_text(size=16), 
+        axis.title = element_text(size=18),
+        legend.text = element_text(face = "italic", size=16), 
+        legend.title = element_text(size=18),
+        legend.position = "right", 
+        strip.text = element_text(size=20)) +
+  guides(fill=guide_legend(ncol = 1)) 
+FigS4A
+
+# taxa that are unique to seeds (Fig. S4B)
+greenArmytage <- distinct_palette(pal = "greenArmytage")
+greenArmytage
+
+seed.only.phy <- subset_taxa(bact.rel.phy, stigma=="FALSE"&seed_pooled=="TRUE")
+seed.only.phy <- prune_samples(sample_sums(seed.only.phy)>0, seed.only.phy)
+
+merged.seed.phy <- seed.only.phy %>%
+  aggregate_top_taxa2(., 20, "genus.x")
+merged.seed.taxa <- tax_table(merged.seed.phy) %>% as.data.frame()
+# shared with seed-only (colors): unknown ("#FB9A99"), other ("#A6CEE3"), prevotella ("#FFFF99"), corynebacterium ("#666666") 
+
+FigS4B <- plot_composition(merged.seed.phy, 
+                           verbose = F, otu.sort = "abundance", group_by = "tissue_type") +
+  scale_fill_manual(values = c("#FB9A99", "#0075DC","#A6CEE3","#6A3D9A","#FFFF99","#993F00",
+                               "#4C005C","#FFCC99","#5EF1F2","#666666","#94FFB5","#8F7C00",
+                               "#9DCC00","#C20088","#003380","#FFA8BB","#FF0010","#00998F",
+                               "#E0FF66","#100AFF", "#990000")) + 
+  labs(x="Sample", y="Relative abundance (%)", fill="Genus") +
+  ylim(0,100)+
+  theme_light()+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_text(size=16), 
+        axis.title = element_text(size=18),
+        legend.text = element_text(face = "italic", size=14), 
+        legend.title = element_text(size=16),
+        legend.position = "right", 
+        strip.text = element_text(size=20)) +
+  guides(fill=guide_legend(ncol = 1, override.aes = list(size=4))) 
+FigS4B
+
 #### Differential abundance analysis with ANCOM-BC2 (Fig. 3B) ####
 output <- ancombc2(data = shared.rel.phy, assay_name = "counts", tax_level = "genus.x",
                    fix_formula = "tissue_type", rand_formula = NULL,
