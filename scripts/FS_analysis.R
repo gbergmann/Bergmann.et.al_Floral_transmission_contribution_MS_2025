@@ -219,13 +219,104 @@ seed.perm <- adonis2(seed.uni.dist~sample_data(seed.pt.phy)$Updated_Field_Name)
 seed.perm
 
 #### overlap between seeds and stigmas across all samples (Fig. 2A) ####
+sample_data(bact.rel.phy)$tissue_type <- factor(sample_data(bact.rel.phy)$tissue_type,
+                                                levels = c("stigma", "seed_pooled"))
+variable1 = as.character(get_variable(bact.rel.phy, "tissue_type"))
+sample_data(bact.rel.phy)$tissue <- mapply(paste0, variable1, collapse = "_")
+
+merged.16S_all <- merge_samples(bact.rel.phy, "tissue")
+#Fix continuous variable to discrete value
+sample_data(merged.16S_all)$tissue <- factor(sample_names(merged.16S_all),
+                                             levels = c("stigma","seed_pooled"))
+#Extract count datasets from phyloseq
+count_16S_all <- t(otu_table(merged.16S_all))
+#Transform in binary matrix
+count_16S_all[count_16S_all> 0] <- 1
+#Convert to dataframe
+df_16S_all <- as.data.frame(count_16S_all)
+#Read abundance per ASV
+rel.abu <- data.frame(taxa_sums(bact.rel.phy))
+rel.abu$log <- log10(rel.abu$taxa_sums.bact.rel.phy.)
+#Merge ASV dataframe and ASV abundance
+df_16S_all_upset <-merge.data.frame(df_16S_all, rel.abu, by="row.names",
+                                    all.x=TRUE)
+#Append taxonomy to upset dataframe
+df_16S_taxa <- tax_table(bact.rel.phy) %>% data.frame() %>% rownames_to_column()
+names(df_16S_taxa)[names(df_16S_taxa)=="rowname"] <- "Row.names"
+
+df_16S_all_upset2 <- full_join(df_16S_all_upset, df_16S_taxa, by="Row.names")
+
+#Upset graph will all comparisons
+Upset_16S_all <- UpSetR::upset(df_16S_all_upset2,
+                               nsets = 2, #adjust to number of columns to compare, here 2 tissue columns
+                               nintersects = NA,
+                               keep.order = T,
+                               order.by = "freq",
+                               mainbar.y.label = "Number of ASVs",
+                               sets.x.label="total tissue\nASV richness",
+                               decreasing ="TRUE", 
+                               text.scale = 2
+)
+Upset_16S_all 
+
+# preparing something fancier with ComplexUpset
+df_16S_all_upset3 <- df_16S_all_upset2[, c(1,3,2,4,5,6,7,8,9,10,11)]    
+tissues <- colnames(df_16S_all_upset3)[2:3]
+df_16S_all_upset3[tissues] = df_16S_all_upset3[tissues] == 1
+t(head(df_16S_all_upset3[tissues], 2))
+df_16S_all_upset3 <- df_16S_all_upset3 %>%
+  filter(!is.na(stigma), !is.na(seed_pooled))
+
+Upset_16S_all2 <- ComplexUpset::upset(
+  df_16S_all_upset3,
+  tissues,
+  base_annotations=list(
+    'Intersection size'=intersection_size(
+      text=list(size=6))),
+  min_size=10,
+  width_ratio=0.1
+)
+
+Fig2A <- Upset_16S_all2 + theme(axis.title = element_text(size=20), axis.text = element_text(size=15))
+Fig2A 
 
 #### Pairwise comparisons of taxa overlaps (Fig. 2B, Fig. S2) ####
 
 #### Partitioning beta-diversity for individual sample pairs (Fig. S3)  ####
 
 #### visualizing most abundant shared + unique genera (Fig. 3A, Fig. S4) ####
+# shared taxa
+bact.rel.taxa <- tax_table(bact.rel.phy) %>% data.frame() %>% rownames_to_column()
+names(bact.rel.taxa)[names(bact.rel.taxa) == "rowname"] <- "Row.names"
+bact.rel.taxa2 <- merge(bact.rel.taxa, df_16S_all_upset3, by="Row.names")
+bact.rel.taxa2 <- column_to_rownames(bact.rel.taxa2, var = "Row.names")
+tax_table(bact.rel.phy) <- as.matrix(bact.rel.taxa2)
+shared.rel.phy <- subset_taxa(bact.rel.phy, stigma=="TRUE"&seed_pooled=="TRUE")
+shared.rel.phy <- prune_samples(sample_sums(shared.rel.phy)>0, shared.rel.phy)
+sample_data(shared.rel.phy)$tissue_type <- factor(sample_data(shared.rel.phy)$tissue_type,
+                                                  levels = c("stigma", "seed_pooled"))
+merged.share.phy <- shared.rel.phy %>%
+  aggregate_top_taxa2(., 20, "genus.x")
 
+scales::show_col(brewerPlus)
+
+Fig3A <- plot_composition(merged.share.phy, 
+                          verbose = F, otu.sort = "abundance", group_by = "tissue_type") +
+  scale_fill_manual(values = brewerPlus) +
+  labs(x="Sample", y="Relative abundance (%)", fill="Genus") +
+  #facet_grid(~tissue_type, scales = "free_x", space = "free_x") +
+  theme_light()+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_text(size=16), 
+        axis.title = element_text(size=18),
+        legend.text = element_text(face = "italic", size=16), 
+        legend.title = element_text(size=18),
+        legend.position = "right", 
+        strip.text = element_text(size=20)) +
+  guides(fill=guide_legend(ncol = 1)) 
+Fig3A 
+
+# taxa unique to stigmas (Fig. S4A)
 #### Differential abundance analysis with ANCOM-BC2 (Fig. 3B) ####
 output <- ancombc2(data = shared.rel.phy, assay_name = "counts", tax_level = "genus.x",
                    fix_formula = "tissue_type", rand_formula = NULL,
