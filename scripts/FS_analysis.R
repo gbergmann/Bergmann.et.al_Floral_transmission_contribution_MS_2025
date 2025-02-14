@@ -1533,7 +1533,37 @@ FigS3A <- pairs.beta.long %>%
 FigS3A 
 
 #### visualizing the abundant taxa in pairwise comparisons (Fig. S3B) ####
+# remove the following samples (no pairing): 
+seed.stigma.phy <- subset_samples(bact.rel.phy, 
+                                  sample_names(bact.rel.phy) !="Co1.2.7" & 
+                                    sample_names(bact.rel.phy) != "Co2.2.10"&
+                                    sample_names(bact.rel.phy) != "Co2.1.3"&
+                                    sample_names(bact.rel.phy) != "Co2.1.5"&
+                                    sample_names(bact.rel.phy) != "Co2.2.7"&
+                                    sample_names(bact.rel.phy) != "SJ1.2.10"&
+                                    sample_names(bact.rel.phy) != "SJ1.2.9"&
+                                    sample_names(bact.rel.phy) != "SJ2.2.1"&
+                                    sample_names(bact.rel.phy) != "SJ2.1.10"&
+                                    sample_names(bact.rel.phy) != "SJ2.1.4"&
+                                    sample_names(bact.rel.phy) != "SJ2.1.7"&
+                                    sample_names(bact.rel.phy) != "SJ2.2.9")
+seed.stigma.phy <- prune_taxa(taxa_sums(seed.stigma.phy)>0, seed.stigma.phy)
 
+seed.stigma.merge <- seed.stigma.phy %>%
+  aggregate_top_taxa2(., 20, "genus.x")
+
+FigS3B <- plot_bar(seed.stigma.merge, x="tissue_type", fill = "genus.x") + 
+  geom_bar(aes(fill=genus.x), stat="identity", position="stack", color="gray33") +
+  facet_grid(Updated_Field_Name~Plant_rep, scales = "free_x",  drop = TRUE)+ 
+  theme_light()+
+  theme(legend.position = "right",legend.text = element_text(size=14),
+        axis.text.x = element_text(size=8, angle = 90, vjust = 0.5, hjust=1),
+        axis.text.y = element_text(size=16), 
+        axis.title = element_text(size=30), strip.text = element_text(size=14))+  
+  labs(x="Tissue type",y="Relative abundance (%)", fill="Genus") +
+  guides(fill=guide_legend(ncol = 2))+
+  scale_fill_manual(values = kelly) 
+FigS3B
 
 #### visualizing most abundant shared + unique genera (Fig. 3A, Fig. S4) ####
 # shared taxa
