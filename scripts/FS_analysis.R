@@ -1146,6 +1146,394 @@ FigS2B <- pairwise.stats %>%
 FigS2B
 
 #### Partitioning beta-diversity for individual sample pairs (Fig. S3) ####
+#Extract count datasets from phyloseq
+SJ1.1.count <- t(otu_table(SJ1.1.phy))
+SJ1.2.count <- t(otu_table(SJ1.2.phy))
+SJ1.3.count <- t(otu_table(SJ1.3.phy))
+SJ1.4.count <- t(otu_table(SJ1.4.phy))
+SJ1.5.count <- t(otu_table(SJ1.5.phy))
+SJ1.6.count <- t(otu_table(SJ1.6.phy))
+SJ1.7.count <- t(otu_table(SJ1.7.phy))
+SJ1.8.count <- t(otu_table(SJ1.8.phy))
+SJ2.2.count <- t(otu_table(SJ2.2.phy))
+SJ2.3.count <- t(otu_table(SJ2.3.phy))
+SJ2.5.count <- t(otu_table(SJ2.5.phy))
+SJ2.6.count <- t(otu_table(SJ2.6.phy))
+Co1.1.count <- t(otu_table(Co1.1.phy))
+Co1.3.count <- t(otu_table(Co1.3.phy))
+Co1.4.count <- t(otu_table(Co1.4.phy))
+Co1.5.count <- t(otu_table(Co1.5.phy))
+Co1.6.count <- t(otu_table(Co1.6.phy))
+Co1.8.count <- t(otu_table(Co1.8.phy))
+Co1.10.count <- t(otu_table(Co1.10.phy))
+Co2.1.count <- t(otu_table(Co2.1.phy))
+Co2.2.count <- t(otu_table(Co2.2.phy))
+Co2.4.count <- t(otu_table(Co2.4.phy))
+Co2.6.count <- t(otu_table(Co2.6.phy))
+Co2.8.count <- t(otu_table(Co2.8.phy))
+Co2.9.count <- t(otu_table(Co2.9.phy))
+
+#Transform in binary matrix - skip for abundance-weighted metrics
+SJ1.1.count[SJ1.1.count>0] <- 1
+SJ1.2.count[SJ1.2.count>0] <- 1
+SJ1.3.count[SJ1.3.count>0] <- 1
+SJ1.4.count[SJ1.4.count>0] <- 1
+SJ1.5.count[SJ1.5.count>0] <- 1
+SJ1.6.count[SJ1.6.count>0] <- 1
+SJ1.7.count[SJ1.7.count>0] <- 1
+SJ1.8.count[SJ1.8.count>0] <- 1
+SJ2.2.count[SJ2.2.count>0] <- 1
+SJ2.3.count[SJ2.3.count>0] <- 1
+SJ2.5.count[SJ2.5.count>0] <- 1
+SJ2.6.count[SJ2.6.count>0] <- 1
+Co1.1.count[Co1.1.count>0] <- 1
+Co1.3.count[Co1.3.count>0] <- 1
+Co1.4.count[Co1.4.count>0] <- 1
+Co1.5.count[Co1.5.count>0] <- 1
+Co1.6.count[Co1.6.count>0] <- 1
+Co1.8.count[Co1.8.count>0] <- 1
+Co1.10.count[Co1.10.count>0] <- 1
+Co2.1.count[Co2.1.count>0] <- 1
+Co2.2.count[Co2.2.count>0] <- 1
+Co2.4.count[Co2.4.count>0] <- 1
+Co2.6.count[Co2.6.count>0] <- 1
+Co2.8.count[Co2.8.count>0] <- 1
+Co2.9.count[Co2.9.count>0] <- 1
+
+#Convert to dataframe
+df_SJ1.1_count <- as.data.frame(t(SJ1.1.count))
+df_SJ1.2_count <- as.data.frame(t(SJ1.2.count))
+df_SJ1.3_count <- as.data.frame(t(SJ1.3.count))
+df_SJ1.4_count <- as.data.frame(t(SJ1.4.count))
+df_SJ1.5_count <- as.data.frame(t(SJ1.5.count))
+df_SJ1.6_count <- as.data.frame(t(SJ1.6.count))
+df_SJ1.7_count <- as.data.frame(t(SJ1.7.count))
+df_SJ1.8_count <- as.data.frame(t(SJ1.8.count))
+df_SJ2.2_count <- as.data.frame(t(SJ2.2.count))
+df_SJ2.3_count <- as.data.frame(t(SJ2.3.count))
+df_SJ2.5_count <- as.data.frame(t(SJ2.5.count))
+df_SJ2.6_count <- as.data.frame(t(SJ2.6.count))
+df_Co1.1_count <- as.data.frame(t(Co1.1.count))
+df_Co1.3_count <- as.data.frame(t(Co1.3.count))
+df_Co1.4_count <- as.data.frame(t(Co1.4.count))
+df_Co1.5_count <- as.data.frame(t(Co1.5.count))
+df_Co1.6_count <- as.data.frame(t(Co1.6.count))
+df_Co1.8_count <- as.data.frame(t(Co1.8.count))
+df_Co1.10_count <- as.data.frame(t(Co1.10.count))
+df_Co2.1_count <- as.data.frame(t(Co2.1.count))
+df_Co2.2_count <- as.data.frame(t(Co2.2.count))
+df_Co2.4_count <- as.data.frame(t(Co2.4.count))
+df_Co2.6_count <- as.data.frame(t(Co2.6.count))
+df_Co2.8_count <- as.data.frame(t(Co2.8.count))
+df_Co2.9_count <- as.data.frame(t(Co2.9.count))
+
+# Betapart - generate phylogenetic trees from the phyloseq objects 
+seqs.SJ1.1 <- refseq(SJ1.1.phy)
+alignment.SJ1.1 <- AlignTranslation(seqs.SJ1.1, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.SJ1.1 <- phyDat(as(alignment.SJ1.1, "matrix"), type="DNA")
+dm.SJ1.1 <- dist.ml(phang.align.SJ1.1)
+treeNJ.SJ1.1 <- NJ(dm.SJ1.1)
+phylo.SJ1.1 <- root(treeNJ.SJ1.1, outgroup = 1, resolve.root = T)
+
+seqs.SJ1.2 <- refseq(SJ1.2.phy)
+alignment.SJ1.2 <- AlignTranslation(seqs.SJ1.2, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.SJ1.2 <- phyDat(as(alignment.SJ1.2, "matrix"), type="DNA")
+dm.SJ1.2 <- dist.ml(phang.align.SJ1.2)
+treeNJ.SJ1.2 <- NJ(dm.SJ1.2)
+phylo.SJ1.2 <- root(treeNJ.SJ1.2, outgroup = 1, resolve.root = T)
+
+seqs.SJ1.3 <- refseq(SJ1.3.phy)
+alignment.SJ1.3 <- AlignTranslation(seqs.SJ1.3, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.SJ1.3 <- phyDat(as(alignment.SJ1.3, "matrix"), type="DNA")
+dm.SJ1.3 <- dist.ml(phang.align.SJ1.3)
+treeNJ.SJ1.3 <- NJ(dm.SJ1.3)
+phylo.SJ1.3 <- root(treeNJ.SJ1.3, outgroup = 1, resolve.root = T)
+
+seqs.SJ1.4 <- refseq(SJ1.4.phy)
+alignment.SJ1.4 <- AlignTranslation(seqs.SJ1.4, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.SJ1.4 <- phyDat(as(alignment.SJ1.4, "matrix"), type="DNA")
+dm.SJ1.4 <- dist.ml(phang.align.SJ1.4)
+treeNJ.SJ1.4 <- NJ(dm.SJ1.4)
+phylo.SJ1.4 <- root(treeNJ.SJ1.4, outgroup = 1, resolve.root = T)
+
+seqs.SJ1.5 <- refseq(SJ1.5.phy)
+alignment.SJ1.5 <- AlignTranslation(seqs.SJ1.5, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.SJ1.5 <- phyDat(as(alignment.SJ1.5, "matrix"), type="DNA")
+dm.SJ1.5 <- dist.ml(phang.align.SJ1.5)
+treeNJ.SJ1.5 <- NJ(dm.SJ1.5)
+phylo.SJ1.5 <- root(treeNJ.SJ1.5, outgroup = 1, resolve.root = T)
+
+seqs.SJ1.6 <- refseq(SJ1.6.phy)
+alignment.SJ1.6 <- AlignTranslation(seqs.SJ1.6, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.SJ1.6 <- phyDat(as(alignment.SJ1.6, "matrix"), type="DNA")
+dm.SJ1.6 <- dist.ml(phang.align.SJ1.6)
+treeNJ.SJ1.6 <- NJ(dm.SJ1.6)
+phylo.SJ1.6 <- root(treeNJ.SJ1.6, outgroup = 1, resolve.root = T)
+
+seqs.SJ1.7 <- refseq(SJ1.7.phy)
+alignment.SJ1.7 <- AlignTranslation(seqs.SJ1.7, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.SJ1.7 <- phyDat(as(alignment.SJ1.7, "matrix"), type="DNA")
+dm.SJ1.7 <- dist.ml(phang.align.SJ1.7)
+treeNJ.SJ1.7 <- NJ(dm.SJ1.7)
+phylo.SJ1.7 <- root(treeNJ.SJ1.7, outgroup = 1, resolve.root = T)
+
+seqs.SJ1.8 <- refseq(SJ1.8.phy)
+alignment.SJ1.8 <- AlignTranslation(seqs.SJ1.8, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.SJ1.8 <- phyDat(as(alignment.SJ1.8, "matrix"), type="DNA")
+dm.SJ1.8 <- dist.ml(phang.align.SJ1.8)
+treeNJ.SJ1.8 <- NJ(dm.SJ1.8)
+phylo.SJ1.8 <- root(treeNJ.SJ1.8, outgroup = 1, resolve.root = T)
+
+seqs.SJ2.2 <- refseq(SJ2.2.phy)
+alignment.SJ2.2 <- AlignTranslation(seqs.SJ2.2, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.SJ2.2 <- phyDat(as(alignment.SJ2.2, "matrix"), type="DNA")
+dm.SJ2.2 <- dist.ml(phang.align.SJ2.2)
+treeNJ.SJ2.2 <- NJ(dm.SJ2.2)
+phylo.SJ2.2 <- root(treeNJ.SJ2.2, outgroup = 1, resolve.root = T)
+
+seqs.SJ2.3 <- refseq(SJ2.3.phy)
+alignment.SJ2.3 <- AlignTranslation(seqs.SJ2.3, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.SJ2.3 <- phyDat(as(alignment.SJ2.3, "matrix"), type="DNA")
+dm.SJ2.3 <- dist.ml(phang.align.SJ2.3)
+treeNJ.SJ2.3 <- NJ(dm.SJ2.3)
+phylo.SJ2.3 <- root(treeNJ.SJ2.3, outgroup = 1, resolve.root = T)
+
+seqs.SJ2.5 <- refseq(SJ2.5.phy)
+alignment.SJ2.5 <- AlignTranslation(seqs.SJ2.5, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.SJ2.5 <- phyDat(as(alignment.SJ2.5, "matrix"), type="DNA")
+dm.SJ2.5 <- dist.ml(phang.align.SJ2.5)
+treeNJ.SJ2.5 <- NJ(dm.SJ2.5)
+phylo.SJ2.5 <- root(treeNJ.SJ2.5, outgroup = 1, resolve.root = T)
+
+seqs.SJ2.6 <- refseq(SJ2.6.phy)
+alignment.SJ2.6 <- AlignTranslation(seqs.SJ2.6, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.SJ2.6 <- phyDat(as(alignment.SJ2.6, "matrix"), type="DNA")
+dm.SJ2.6 <- dist.ml(phang.align.SJ2.6)
+treeNJ.SJ2.6 <- NJ(dm.SJ2.6)
+phylo.SJ2.6 <- root(treeNJ.SJ2.6, outgroup = 1, resolve.root = T)
+
+seqs.Co1.1 <- refseq(Co1.1.phy)
+alignment.Co1.1 <- AlignTranslation(seqs.Co1.1, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.Co1.1 <- phyDat(as(alignment.Co1.1, "matrix"), type="DNA")
+dm.Co1.1 <- dist.ml(phang.align.Co1.1)
+treeNJ.Co1.1 <- NJ(dm.Co1.1)
+phylo.Co1.1 <- root(treeNJ.Co1.1, outgroup = 1, resolve.root = T)
+
+seqs.Co1.3 <- refseq(Co1.3.phy) 
+alignment.Co1.3 <- AlignTranslation(seqs.Co1.3, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.Co1.3 <- phyDat(as(alignment.Co1.3, "matrix"), type="DNA")
+dm.Co1.3 <- dist.ml(phang.align.Co1.3)
+treeNJ.Co1.3 <- NJ(dm.Co1.3)
+phylo.Co1.3 <- root(treeNJ.Co1.3, outgroup = 1, resolve.root = T)
+
+seqs.Co1.4 <- refseq(Co1.4.phy)
+alignment.Co1.4 <- AlignTranslation(seqs.Co1.4, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.Co1.4 <- phyDat(as(alignment.Co1.4, "matrix"), type="DNA")
+dm.Co1.4 <- dist.ml(phang.align.Co1.4)
+treeNJ.Co1.4 <- NJ(dm.Co1.4)
+phylo.Co1.4 <- root(treeNJ.Co1.4, outgroup = 1, resolve.root = T)
+
+seqs.Co1.5 <- refseq(Co1.5.phy)
+alignment.Co1.5 <- AlignTranslation(seqs.Co1.5, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.Co1.5 <- phyDat(as(alignment.Co1.5, "matrix"), type="DNA")
+dm.Co1.5 <- dist.ml(phang.align.Co1.5)
+treeNJ.Co1.5 <- NJ(dm.Co1.5)
+phylo.Co1.5 <- root(treeNJ.Co1.5, outgroup = 1, resolve.root = T)
+
+seqs.Co1.6 <- refseq(Co1.6.phy)
+alignment.Co1.6 <- AlignTranslation(seqs.Co1.6, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.Co1.6 <- phyDat(as(alignment.Co1.6, "matrix"), type="DNA")
+dm.Co1.6 <- dist.ml(phang.align.Co1.6)
+treeNJ.Co1.6 <- NJ(dm.Co1.6)
+phylo.Co1.6 <- root(treeNJ.Co1.6, outgroup = 1, resolve.root = T)
+
+seqs.Co1.8 <- refseq(Co1.8.phy)
+alignment.Co1.8 <- AlignTranslation(seqs.Co1.8, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.Co1.8 <- phyDat(as(alignment.Co1.8, "matrix"), type="DNA")
+dm.Co1.8 <- dist.ml(phang.align.Co1.8)
+treeNJ.Co1.8 <- NJ(dm.Co1.8)
+phylo.Co1.8 <- root(treeNJ.Co1.8, outgroup = 1, resolve.root = T)
+
+seqs.Co1.10 <- refseq(Co1.10.phy)
+alignment.Co1.10 <- AlignTranslation(seqs.Co1.10, sense = "+", readingFrame = 2, 
+                                     type ="DNAStringSet") 
+phang.align.Co1.10 <- phyDat(as(alignment.Co1.10, "matrix"), type="DNA")
+dm.Co1.10 <- dist.ml(phang.align.Co1.10)
+treeNJ.Co1.10 <- NJ(dm.Co1.10)
+phylo.Co1.10 <- root(treeNJ.Co1.10, outgroup = 1, resolve.root = T)
+
+seqs.Co2.1 <- refseq(Co2.1.phy)
+alignment.Co2.1 <- AlignTranslation(seqs.Co2.1, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.Co2.1 <- phyDat(as(alignment.Co2.1, "matrix"), type="DNA")
+dm.Co2.1 <- dist.ml(phang.align.Co2.1)
+treeNJ.Co2.1 <- NJ(dm.Co2.1)
+phylo.Co2.1 <- root(treeNJ.Co2.1, outgroup = 1, resolve.root = T)
+
+seqs.Co2.2 <- refseq(Co2.2.phy)
+alignment.Co2.2 <- AlignTranslation(seqs.Co2.2, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.Co2.2 <- phyDat(as(alignment.Co2.2, "matrix"), type="DNA")
+dm.Co2.2 <- dist.ml(phang.align.Co2.2)
+treeNJ.Co2.2 <- NJ(dm.Co2.2)
+phylo.Co2.2 <- root(treeNJ.Co2.2, outgroup = 1, resolve.root = T)
+
+seqs.Co2.4 <- refseq(Co2.4.phy)
+alignment.Co2.4 <- AlignTranslation(seqs.Co2.4, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.Co2.4 <- phyDat(as(alignment.Co2.4, "matrix"), type="DNA")
+dm.Co2.4 <- dist.ml(phang.align.Co2.4)
+treeNJ.Co2.4 <- NJ(dm.Co2.4)
+phylo.Co2.4 <- root(treeNJ.Co2.4, outgroup = 1, resolve.root = T)
+
+seqs.Co2.6 <- refseq(Co2.6.phy)
+alignment.Co2.6 <- AlignTranslation(seqs.Co2.6, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.Co2.6 <- phyDat(as(alignment.Co2.6, "matrix"), type="DNA")
+dm.Co2.6 <- dist.ml(phang.align.Co2.6)
+treeNJ.Co2.6 <- NJ(dm.Co2.6)
+phylo.Co2.6 <- root(treeNJ.Co2.6, outgroup = 1, resolve.root = T)
+
+seqs.Co2.8 <- refseq(Co2.8.phy)
+alignment.Co2.8 <- AlignTranslation(seqs.Co2.8, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.Co2.8 <- phyDat(as(alignment.Co2.8, "matrix"), type="DNA")
+dm.Co2.8 <- dist.ml(phang.align.Co2.8)
+treeNJ.Co2.8 <- NJ(dm.Co2.8)
+phylo.Co2.8 <- root(treeNJ.Co2.8, outgroup = 1, resolve.root = T)
+
+seqs.Co2.9 <- refseq(Co2.9.phy)
+alignment.Co2.9 <- AlignTranslation(seqs.Co2.9, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.Co2.9 <- phyDat(as(alignment.Co2.9, "matrix"), type="DNA")
+dm.Co2.9 <- dist.ml(phang.align.Co2.9)
+treeNJ.Co2.9 <- NJ(dm.Co2.9)
+phylo.Co2.9 <- root(treeNJ.Co2.9, outgroup = 1, resolve.root = T)
+
+# Betapart - run the analysis 
+SJ1.1.betapart <- phylo.beta.pair(df_SJ1.1_count, phylo.SJ1.1, index.family = "jaccard")
+SJ1.2.betapart <- phylo.beta.pair(df_SJ1.2_count, phylo.SJ1.2, index.family = "jaccard")
+SJ1.3.betapart <- phylo.beta.pair(df_SJ1.3_count, phylo.SJ1.3, index.family = "jaccard")
+SJ1.4.betapart <- phylo.beta.pair(df_SJ1.4_count, phylo.SJ1.4, index.family = "jaccard")
+SJ1.5.betapart <- phylo.beta.pair(df_SJ1.5_count, phylo.SJ1.5, index.family = "jaccard")
+SJ1.6.betapart <- phylo.beta.pair(df_SJ1.6_count, phylo.SJ1.6, index.family = "jaccard")
+SJ1.7.betapart <- phylo.beta.pair(df_SJ1.7_count, phylo.SJ1.7, index.family = "jaccard")
+SJ1.8.betapart <- phylo.beta.pair(df_SJ1.8_count, phylo.SJ1.8, index.family = "jaccard")
+SJ2.2.betapart <- phylo.beta.pair(df_SJ2.2_count, phylo.SJ2.2, index.family = "jaccard")
+SJ2.3.betapart <- phylo.beta.pair(df_SJ2.3_count, phylo.SJ2.3, index.family = "jaccard")
+SJ2.5.betapart <- phylo.beta.pair(df_SJ2.5_count, phylo.SJ2.5, index.family = "jaccard")
+SJ2.6.betapart <- phylo.beta.pair(df_SJ2.6_count, phylo.SJ2.6, index.family = "jaccard")
+Co1.1.betapart <- phylo.beta.pair(df_Co1.1_count, phylo.Co1.1, index.family = "jaccard")
+Co1.3.betapart <- phylo.beta.pair(df_Co1.3_count, phylo.Co1.3, index.family = "jaccard")
+Co1.4.betapart <- phylo.beta.pair(df_Co1.4_count, phylo.Co1.4, index.family = "jaccard")
+Co1.5.betapart <- phylo.beta.pair(df_Co1.5_count, phylo.Co1.5, index.family = "jaccard")
+Co1.6.betapart <- phylo.beta.pair(df_Co1.6_count, phylo.Co1.6, index.family = "jaccard")
+Co1.8.betapart <- phylo.beta.pair(df_Co1.8_count, phylo.Co1.8, index.family = "jaccard")
+Co1.10.betapart <- phylo.beta.pair(df_Co1.10_count, phylo.Co1.10, index.family = "jaccard")
+Co2.1.betapart <- phylo.beta.pair(df_Co2.1_count, phylo.Co2.1, index.family = "jaccard")
+Co2.2.betapart <- phylo.beta.pair(df_Co2.2_count, phylo.Co2.2, index.family = "jaccard")
+Co2.4.betapart <- phylo.beta.pair(df_Co2.4_count, phylo.Co2.4, index.family = "jaccard")
+Co2.6.betapart <- phylo.beta.pair(df_Co2.6_count, phylo.Co2.6, index.family = "jaccard")
+Co2.8.betapart <- phylo.beta.pair(df_Co2.8_count, phylo.Co2.8, index.family = "jaccard")
+Co2.9.betapart <- phylo.beta.pair(df_Co2.9_count, phylo.Co2.9, index.family = "jaccard")
+
+# visualizing the decomposed dispersion
+SJ1.1.betapart.df <- as.data.frame(SJ1.1.betapart,row.names = "SJ1.1") %>% rownames_to_column(var = "SampID")
+SJ1.2.betapart.df <- as.data.frame(SJ1.2.betapart, row.names = "SJ1.2") %>% 
+  rownames_to_column(var = "SampID")
+SJ1.3.betapart.df <- as.data.frame(SJ1.3.betapart, row.names = "SJ1.3") %>% 
+  rownames_to_column(var = "SampID")
+SJ1.4.betapart.df <- as.data.frame(SJ1.4.betapart, row.names = "SJ1.4") %>% 
+  rownames_to_column(var = "SampID")
+SJ1.5.betapart.df <- as.data.frame(SJ1.5.betapart, row.names = "SJ1.5") %>% 
+  rownames_to_column(var = "SampID")
+SJ1.6.betapart.df <- as.data.frame(SJ1.6.betapart, row.names = "SJ1.6") %>% 
+  rownames_to_column(var = "SampID")
+SJ1.7.betapart.df <- as.data.frame(SJ1.7.betapart, row.names = "SJ1.7") %>% 
+  rownames_to_column(var = "SampID")
+SJ1.8.betapart.df <- as.data.frame(SJ1.8.betapart, row.names = "SJ1.8") %>% 
+  rownames_to_column(var = "SampID")
+SJ2.2.betapart.df <- as.data.frame(SJ2.2.betapart, row.names = "SJ2.2") %>% 
+  rownames_to_column(var = "SampID")
+SJ2.3.betapart.df <- as.data.frame(SJ2.3.betapart, row.names = "SJ2.3") %>% 
+  rownames_to_column(var = "SampID")
+SJ2.5.betapart.df <- as.data.frame(SJ2.5.betapart, row.names = "SJ2.5") %>% 
+  rownames_to_column(var = "SampID")
+SJ2.6.betapart.df <- as.data.frame(SJ2.6.betapart, row.names = "SJ2.6") %>% 
+  rownames_to_column(var = "SampID")
+Co1.1.betapart.df <- as.data.frame(Co1.1.betapart, row.names = "Co1.1") %>% 
+  rownames_to_column(var = "SampID")
+Co1.3.betapart.df <- as.data.frame(Co1.3.betapart, row.names = "Co1.3") %>% 
+  rownames_to_column(var = "SampID")
+Co1.4.betapart.df <- as.data.frame(Co1.4.betapart, row.names = "Co1.4") %>% 
+  rownames_to_column(var = "SampID")
+Co1.5.betapart.df <- as.data.frame(Co1.5.betapart, row.names = "Co1.5") %>% 
+  rownames_to_column(var = "SampID")
+Co1.6.betapart.df <- as.data.frame(Co1.6.betapart, row.names = "Co1.6") %>% 
+  rownames_to_column(var = "SampID")
+Co1.8.betapart.df <- as.data.frame(Co1.8.betapart, row.names = "Co1.8") %>% 
+  rownames_to_column(var = "SampID")
+Co1.10.betapart.df <- as.data.frame(Co1.10.betapart, row.names = "Co1.10") %>%
+  rownames_to_column(var = "SampID")
+Co2.1.betapart.df <- as.data.frame(Co2.1.betapart, row.names = "Co2.1") %>%
+  rownames_to_column(var = "SampID")
+Co2.2.betapart.df <- as.data.frame(Co2.2.betapart, row.names = "Co2.2") %>%
+  rownames_to_column(var = "SampID")
+Co2.4.betapart.df <- as.data.frame(Co2.4.betapart, row.names = "Co2.4") %>%
+  rownames_to_column(var = "SampID")
+Co2.6.betapart.df <- as.data.frame(Co2.6.betapart, row.names = "Co2.6") %>%
+  rownames_to_column(var = "SampID")
+Co2.8.betapart.df <- as.data.frame(Co2.8.betapart, row.names = "Co2.8") %>%
+  rownames_to_column(var = "SampID")
+Co2.9.betapart.df <- as.data.frame(Co2.9.betapart, row.names = "Co2.9") %>%
+  rownames_to_column(var = "SampID")
+
+all.pairs.beta <- SJ1.1.betapart.df %>%
+  bind_rows(SJ1.2.betapart.df) %>%
+  bind_rows(SJ1.3.betapart.df) %>%
+  bind_rows(SJ1.4.betapart.df) %>%
+  bind_rows(SJ1.5.betapart.df) %>%
+  bind_rows(SJ1.6.betapart.df) %>%
+  bind_rows(SJ1.7.betapart.df) %>%
+  bind_rows(SJ1.8.betapart.df) %>%
+  bind_rows(SJ2.2.betapart.df) %>%
+  bind_rows(SJ2.3.betapart.df) %>%
+  bind_rows(SJ2.5.betapart.df) %>%
+  bind_rows(SJ2.6.betapart.df) %>%
+  bind_rows(Co1.1.betapart.df) %>%
+  bind_rows(Co1.10.betapart.df) %>%
+  bind_rows(Co1.3.betapart.df) %>%
+  bind_rows(Co1.4.betapart.df) %>%
+  bind_rows(Co1.5.betapart.df) %>%
+  bind_rows(Co1.6.betapart.df) %>%
+  bind_rows(Co1.8.betapart.df) %>%
+  bind_rows(Co2.1.betapart.df) %>%
+  bind_rows(Co2.2.betapart.df) %>%
+  bind_rows(Co2.4.betapart.df) %>%
+  bind_rows(Co2.6.betapart.df) %>%
+  bind_rows(Co2.8.betapart.df)
+
+all.pairs.beta <- all.pairs.beta %>% 
+  mutate(jtu.percent = (phylo.beta.jtu/phylo.beta.jac)*100) %>%
+  mutate(jne.percent = (phylo.beta.jne/phylo.beta.jac)*100)
+
+all.pairs.beta$Field <- c("SJ1", "SJ1", "SJ1", "SJ1","SJ1","SJ1","SJ1","SJ1","SJ2","SJ2","SJ2","SJ2",
+                          "Co1","Co1","Co1","Co1","Co1","Co1","Co1","Co2","Co2","Co2","Co2","Co2")
+
+pairs.beta.long <- all.pairs.beta %>%
+  select(SampID, Field, jtu.percent, jne.percent) %>%
+  pivot_longer(cols = c(jtu.percent, jne.percent), names_to = "beta_type", values_to = "percent")
+
+FigS3A <- pairs.beta.long %>%
+  ggplot(aes(x=SampID, y=percent, fill=beta_type)) +
+  geom_col(position = "stack") +
+  labs(x="Pair",y="Percent of beta-diversity (Jaccard)", fill="Diversity component")+
+  facet_wrap(~Field, scales = "free_x") + 
+  scale_fill_discrete(name = "Diversity\ncomponent", labels = c("Nestedness", "Turnover")) +
+  theme_light() +
+  theme(axis.title = element_text(size=18),
+        axis.text.y = element_text(size=16), 
+        axis.text.x = element_text(size=14),
+        legend.title = element_text(size=18), 
+        legend.text = element_text(size=16))
+FigS3A 
+
+#### visualizing the abundant taxa in pairwise comparisons (Fig. S3B) ####
+
 
 #### visualizing most abundant shared + unique genera (Fig. 3A, Fig. S4) ####
 # shared taxa
