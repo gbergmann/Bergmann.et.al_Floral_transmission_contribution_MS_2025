@@ -31,3 +31,11 @@ bact.rich.rel.phy <- readRDS("data_output_seq/Field_survey/clean.bact.rich.rel.p
 bact.rel.phy <- readRDS("data_output_seq/Field_survey/clean.bact.rel.phy.rds")
 
 #### alpha diversity (observed richness and Faith's PD) ####
+
+#### NMDS and PerMANOVA ####
+
+#### overlap between seeds and stigmas across all samples ####
+
+#### visualizing most abundant shared + unique genera ####
+
+#### Differential abundance analysis with ANCOM-BC2 ####
