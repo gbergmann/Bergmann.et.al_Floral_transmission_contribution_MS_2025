@@ -93,3 +93,68 @@ dna.gyrB <- Biostrings::DNAStringSet(taxa_names(psgyrB_1))
 names(dna.gyrB) <- taxa_names(psgyrB_1)
 psgyrB_2 <- merge_phyloseq(psgyrB_1, dna.gyrB)
 taxa_names(psgyrB_2) <- paste0("ASV", seq(ntaxa(psgyrB_2)))
+gyrB.phy <- psgyrB_2
+
+#### Part 4: filtering out contaminants and low-depth samples ####
+df <- as.data.frame(sample_data(gyrB.phy))
+df$LibrarySize <- sample_sums(gyrB.phy)
+df <- df[order(df$LibrarySize),]
+df$Index <- seq(nrow(df))
+ggplot(data=df, aes(x=Index, y=LibrarySize, color=Sample_or_Control)) + geom_point()
+
+#identify negative controls
+sample_data(gyrB.phy)$is.neg <- sample_data(gyrB.phy)$Sample_or_Control == "Control"
+
+#run decontam with threshold 0.5
+contamdf.prev <- isContaminant(gyrB.phy, method="prevalence", neg="is.neg", threshold=0.2) 
+table(contamdf.prev$contaminant) 
+# show contaminant ASVs with associated taxonomy
+contamdf.prev.list <- contamdf.prev %>% 
+  filter(contaminant == TRUE)
+contamdf.prev.list.taxo <-  merge(contamdf.prev.list, 
+                                   as.data.frame(tax_table(gyrB.phy)), 
+                                   by="row.names")
+ps.pa <- transform_sample_counts(gyrB.phy, function(abund) 1*(abund>0))
+ps.pa.neg <- prune_samples(sample_data(ps.pa)$control == "yes", ps.pa)
+ps.pa.pos <- prune_samples(sample_data(ps.pa)$control == "no", ps.pa)
+# Make data.frame of prevalence in positive and negative samples
+df.pa <- data.frame(pa.pos=taxa_sums(ps.pa.pos), pa.neg=taxa_sums(ps.pa.neg),
+                    contaminant=contamdf.prev$contaminant)
+ggplot(df.pa, aes(x=pa.neg, y=pa.pos, color=contaminant)) + geom_point() +
+  xlab("Prevalence (Negative Controls)") + ylab("Prevalence (True Samples)")
+
+contamdf.prev[contamdf.prev$contaminant == TRUE, ]  #9 true contaminants
+# Prune TRUE contaminants in phyloseq objects
+gyrB.phy.v2 <- prune_taxa(!contamdf.prev$contaminant, gyrB.phy)
+gyrB.phy.v2 
+gyrB.phy.asv <- otu_table(gyrB.phy.v2) %>% as.data.frame()
+gyrB.phy.asv %>% write.csv("data_output_seq/Pollinator_exp/post.decontam.asv.csv")
+
+plotSeqDepth <- function(phy,cutoff){
+  pctPass <- gyrB.phy.v2 %>% sample_data %>% data.frame %>% 
+    mutate(SeqDepth=sample_sums(phy),
+           pass=SeqDepth>cutoff) %>% 
+    #group_by(DataSet) %>%
+    summarise(nSamps=n(),pctPass=round(100*sum(pass)/n(),1))
+  gyrB.phy.v2 %>% sample_data %>% data.frame %>%  
+    mutate(SeqDepth=sample_sums(gyrB.phy.v2)) %>% 
+    .[order(.$SeqDepth),] %>%
+    mutate(Index=factor(seq(nrow(.)))) %>%
+    ggplot(aes(x=Index, y=SeqDepth,color=SeqDepth<cutoff)) + 
+    geom_point(position=position_jitter(width=50),alpha=0.5,shape=19) +
+    geom_text(aes(x=-Inf,y=Inf,label=paste0(nSamps," samples")),data=pctPass,inherit.aes = F, hjust=-0.1, vjust=1.5) +
+    geom_text(aes(x=-Inf,y=Inf,label=paste0(pctPass, "% > ",cutoff, " seqs")),data=pctPass,inherit.aes = F, hjust=-0.1, vjust=3) +
+    scale_color_calc(name=paste0("Sequencing depth > ",cutoff,"\n")) +
+    #facet_wrap(~DataSet,scales="free") +
+    theme_classic() + 
+    theme(legend.position = "none",axis.text.x = element_blank(),axis.ticks.x = element_blank()) 
+}
+plotSeqDepth(gyrB.phy.v2,2000)
+minDepth <- 2000 # this minDepth is based off the cutoffs tested with the plot
+
+# Remove samples below sequencing depth cutoff
+(gyrB.phy.v2 %<>% prune_samples(sample_sums(.)>minDepth,.))
+gyrB.rel.phy <- transform_sample_counts(gyrB.phy, function(x){(x/sum(x))*100})
+
+saveRDS(gyrB.phy, "data_output_seq/Pollinator_exp/PE.gyrB.raw.phy.rds")
+saveRDS(gyrB.rel.phy, "data_output_seq/Pollinator_exp/PE.gyrB.rel.phy.rds")
