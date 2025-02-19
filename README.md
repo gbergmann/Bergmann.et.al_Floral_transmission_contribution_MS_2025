@@ -1,7 +1,7 @@
 # Contribution of floral transmission to the assembly and health impact of bacterial communities in watermelon seeds 
 ## Authors: Gillian E. Bergmann, Kacie Lui, Carina Lopez, Alex Velasco, Coralie Marais, Matthieu Barret, Marie Simonin, Rachel L. Vannette, Johan H.J. Leveau
 
-This repository represents a combination of datasets and analyses used to produce the results for a manuscript on the floral transmission of bacterial communities to developing watermelon seeds. This manuscript will be deposited in biorxiv and submitted to New Phytologist for review. 
+This repository represents a combination of datasets and analyses used to produce the results for a manuscript on the floral transmission of bacterial communities to developing watermelon seeds. This manuscript has been deposited as a preprint on bioRxiv (https://doi.org/10.1101/2025.02.12.637993) and submitted to a journal for peer review. The data deposition is still being finalized, check back for updates on scripts and description of repository structure. 
 _______________________
 This repository depends on the following R packages:
 - tidyverse
