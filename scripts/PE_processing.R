@@ -11,6 +11,8 @@ library(ggplot2)
 library(stringr)
 library(readxl)
 library(tibble)
+library(ggthemes)
+library(decontam)
 
 #### Part 1: cutadapt (done in command line) ####
 
@@ -78,3 +80,16 @@ head(taxa.print.g)
 saveRDS(taxa.g, "Gillian_gyrB_taxo.rds")
 
 #### Part 3: Compile data into phyloseq object #### 
+asvgyrB <- readRDS("Gillian_ASV_gyrB.rds")
+taxgyrB <- readRDS("Gillian_gyrB_taxo.rds")
+design <- read.csv("design.csv", sep = ";",  check.names=FALSE, row.names=1)
+psgyrB_0 <- phyloseq(tax_table(taxgyrB), sample_data(design),
+                     otu_table(asvgyrB, taxa_are_rows = FALSE)) 
+psgyrB_0# 3359 taxa and 132 samples
+psgyrB_1 <- subset_taxa(psgyrB_0, !is.na(Kingdom) & !Kingdom %in% c("parE") & !is.na(Phylum)) psgyrB_1 # 2117 taxa and 132 samples 
+
+# Renaming ASVs
+dna.gyrB <- Biostrings::DNAStringSet(taxa_names(psgyrB_1))
+names(dna.gyrB) <- taxa_names(psgyrB_1)
+psgyrB_2 <- merge_phyloseq(psgyrB_1, dna.gyrB)
+taxa_names(psgyrB_2) <- paste0("ASV", seq(ntaxa(psgyrB_2)))
