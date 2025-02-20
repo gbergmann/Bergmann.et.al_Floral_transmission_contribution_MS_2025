@@ -20,9 +20,11 @@ library(UpSetR)
 library(ComplexUpset)
 library(paletteer)
 library(cowplot)
+library(DECIPHER)
+library(phangorn)
 
 # and data
-gyrB.rel.phy <- readRDS("data_output_seq/Pollinator_exp/PE.gyrB.rel.phy.rds")
+gyrB.rel.phy <- readRDS("data_output_seq/Pollinator_exp/PE.gyrB.rel.phy.rds") 
 
 #### UpSet plots bee vs. seed ASVs in each treatment (Fig 4A) ####
 hand.bee.phy <- subset_samples(gyrB.rel.phy, treatment == "hand"|tissue_type == "bee_pooled")
@@ -119,7 +121,7 @@ seqs.gyrB <- refseq(gyrB.rel.phy)
 alignment.gyrB <- AlignTranslation(seqs.gyrB, sense = "+", readingFrame = 2, type ="DNAStringSet") 
 phang.align.gyrB <- phyDat(as(alignment.gyrB, "matrix"), type="DNA")
 dm.gyrB <- dist.ml(phang.align.gyrB)
-treeNJ.gyrB <- NJ(dm.gyrB)# Note, tip order != sequence order 
+treeNJ.gyrB <- NJ(dm.gyrB) 
 is.rooted(treeNJ.gyrB)
 gyrB.tree <- root(treeNJ.gyrB, outgroup = 1, resolve.root = T)
 is.rooted(gyrB.tree)
@@ -127,11 +129,14 @@ dgyrB.pt <- phyloseq(tax_table(gyrB.rel.phy), sample_data(gyrB.rel.phy),
                      otu_table(gyrB.rel.phy, taxa_are_rows = FALSE), 
                      refseq(gyrB.rel.phy), phy_tree(gyrB.tree))
 
-seed.pt.asv.df <- as.data.frame(dgyrB.pt@otu_table)
-seed.gyrB.tree <- phy_tree(dgyrB.pt)
+seed.dgyrB.pt <- subset_samples(dgyrB.pt, tissue_type == "seed_pooled")
+seed.dgyrB.pt <- prune_taxa(taxa_sums(seed.dgyrB.pt)>0, seed.dgyrB.pt)
+
+seed.pt.asv.df <- as.data.frame(seed.dgyrB.pt@otu_table)
+seed.gyrB.tree <- phy_tree(seed.dgyrB.pt)
 seed.gyrB.pd <- pd(seed.pt.asv.df,seed.gyrB.tree, include.root = T)
 
-seed.pt.meta <- as.data.frame(dgyrB.pt@sam_data)
+seed.pt.meta <- as.data.frame(seed.dgyrB.pt@sam_data)
 seed.pt.meta %<>% data.frame()
 seed.pt.meta$Faiths_PD <- seed.gyrB.pd$PD
 seed.pt.meta$treatment <- factor(seed.pt.meta$treatment, levels = c("hand", "insect"))
@@ -153,11 +158,11 @@ Fig4B
 t.test(Faiths_PD~treatment, data = seed.pt.meta)
 
 #### compare community composition between treatments (Fig. 4C) ####
-seed.gyrB.uni <- dgyrB.pt %>% phyloseq::distance("wunifrac") %>% sqrt
+seed.gyrB.uni <- seed.dgyrB.pt %>% phyloseq::distance("wunifrac") %>% sqrt
 seed.gyrB.nmds <- metaMDS(seed.gyrB.uni, trymax=200, parallel=10, k=2) 
 seed.gyrB.nmds.dat <- scores(seed.gyrB.nmds, display = "site") %>% data.frame %>% 
   rownames_to_column("sampID") %>%
-  full_join(sample_data(seed.pt.rel) %>% data.frame %>% rownames_to_column("sampID"))
+  full_join(sample_data(seed.dgyrB.pt) %>% data.frame %>% rownames_to_column("sampID"))
 
 Fig4C <- ggplot(seed.gyrB.nmds.dat,aes(x=NMDS1,y=NMDS2))+ 
   geom_point(aes(color=treatment),size=5)+
@@ -173,8 +178,8 @@ Fig4C <- ggplot(seed.gyrB.nmds.dat,aes(x=NMDS1,y=NMDS2))+
 Fig4C
 
 # PerMANOVA
-seed.gyrB.dist <- dgyrB.pt %>% phyloseq::distance("wunifrac")  
-seed.perm <- adonis(seed.gyrB.dist~sample_data(dgyrB.pt)$treatment)
+seed.gyrB.dist <- seed.dgyrB.pt %>% phyloseq::distance("wunifrac")  
+seed.perm <- adonis(seed.gyrB.dist~sample_data(seed.dgyrB.pt)$treatment)
 print(seed.perm$aov.tab)
 
 #### visualize taxonomic composition in each treatment (Fig. S5A) ####
@@ -196,3 +201,78 @@ FigS5A <- plot_bar(seed.merged.phy, x="Sample",fill = "Genus") +
 FigS5A
 
 #### visualize the differences in beta-dispersion between treatments (Fig. S5B) ####
+treatments <- factor(c("hand", "hand", "hand", "insect", "hand", "hand", "hand","insect","insect",
+                   "hand", "hand", "hand","insect","insect","hand","hand","insect","insect"))
+
+gyrB.dist <- vegdist(otu_table(seed.dgyrB.pt))
+gyrB.disper <- betadisper(gyrB.dist, treatments)
+
+betadisper_distances <- function(model){
+  temp <- data.frame(group = model$group)
+  temp2 <- data.frame(distances = unlist(model$distances))
+  temp2$sample <- row.names(temp2)
+  temp <- cbind(temp, temp2)
+  temp <- dplyr::select(temp, group, sample, dplyr::everything())
+  row.names(temp) <- NULL
+  return(temp)
+}
+
+# getting eigenvalues out of betadisper() object
+betadisper_eigenvalue <- function(model){
+  temp <- data.frame(eig = unlist(model$eig))
+  temp$PCoA <- row.names(temp)
+  row.names(temp) <- NULL
+  return(temp)
+}
+
+# getting the eigenvectors out of a betadisper() object
+betadisper_eigenvector <- function(model){
+  temp <- data.frame(group = model$group)
+  temp2 <- data.frame(unlist(model$vectors))
+  temp2$sample <- row.names(temp2)
+  temp <- cbind(temp, temp2)
+  temp <- dplyr::select(temp, group, sample, dplyr::everything())
+  row.names(temp) <- NULL
+  return(temp)
+}
+
+# get centroids
+betadisper_centroids <- function(model){
+  temp <- data.frame(unlist(model$centroids))
+  temp$group <- row.names(temp)
+  temp <- dplyr::select(temp, group, dplyr::everything())
+  row.names(temp) <- NULL
+  return(temp)
+}
+
+# betadisper data
+get_betadisper_data <- function(model){
+  temp <- list(distances = betadisper_distances(model),
+               eigenvalue = betadisper_eigenvalue(model),
+               eigenvector = betadisper_eigenvector(model),
+               centroids = betadisper_centroids(model))
+  return(temp)
+}
+
+# get betadisper data ####
+gyrb.disper.dat <- get_betadisper_data(gyrB.disper)
+
+# do some transformations on the data
+gyrb.disper.dat$eigenvalue <- mutate(gyrb.disper.dat$eigenvalue, percent = eig/sum(eig))
+
+# make the nicer boxplot
+gyrB.disper.dat.df <- gyrb.disper.dat$distances # need to join with metadata
+gyrB.disper.dat.df
+
+Figs5B<- gyrB.disper.dat.df %>%
+  ggplot(aes(group, distances)) +
+  geom_boxplot(outlier.shape = NA, width = 0.5, 
+               position = position_dodge(width = 0.55)) +
+  stat_compare_means()+
+  scale_fill_viridis(option = "C", discrete = T) +
+  scale_color_viridis(option = "C", discrete = T) +
+  ylab('Distance to centroid') +
+  theme(legend.position = 'right', axis.title = element_text(size=20), 
+        axis.text = element_text(size = 15)) +
+  xlab('Sampling tissue') 
+Figs5B
