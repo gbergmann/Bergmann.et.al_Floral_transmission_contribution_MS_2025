@@ -178,5 +178,21 @@ seed.perm <- adonis(seed.gyrB.dist~sample_data(dgyrB.pt)$treatment)
 print(seed.perm$aov.tab)
 
 #### visualize taxonomic composition in each treatment (Fig. S5A) ####
+seed.merged.phy <- dgyrB.pt %>%
+  aggregate_top_taxa2(., 20, "Genus")
+
+brewerPlus <- distinct_palette()
+
+FigS5A <- plot_bar(seed.merged.phy, x="Sample",fill = "Genus") +
+  geom_bar(aes(fill=Genus), stat="identity", position="stack", color="gray33") +
+  facet_grid(~treatment, scales = "free_x", space = "free_x") +
+  theme(legend.position = "right",legend.text = element_text(size=15), 
+        axis.text.x = element_blank(), axis.text.y = element_text(size=25),
+        axis.title = element_text(size=30), 
+        strip.text = element_text(size=30))+  
+  guides(fill=guide_legend(ncol = 1)) +
+  labs(y="Relative abundance (%)") +
+  scale_fill_manual(values = brewerPlus)
+FigS5A
 
 #### visualize the differences in beta-dispersion between treatments (Fig. S5B) ####
