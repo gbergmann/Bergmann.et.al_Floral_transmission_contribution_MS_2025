@@ -115,11 +115,23 @@ Fig4A <- plot_grid(Upset_hand_bee2, Upset_ins_bee2, ncol=1, scale = 0.9)
 Fig4A
 
 #### compare Faith's phylogenetic diversity between treatments (Fig. 4B) ####
-seed.pt.asv.df <- as.data.frame(gyrB.rel.phy@otu_table)
-seed.gyrB.tree <- phy_tree(gyrB.rel.phy)
+seqs.gyrB <- refseq(gyrB.rel.phy)
+alignment.gyrB <- AlignTranslation(seqs.gyrB, sense = "+", readingFrame = 2, type ="DNAStringSet") 
+phang.align.gyrB <- phyDat(as(alignment.gyrB, "matrix"), type="DNA")
+dm.gyrB <- dist.ml(phang.align.gyrB)
+treeNJ.gyrB <- NJ(dm.gyrB)# Note, tip order != sequence order 
+is.rooted(treeNJ.gyrB)
+gyrB.tree <- root(treeNJ.gyrB, outgroup = 1, resolve.root = T)
+is.rooted(gyrB.tree)
+dgyrB.pt <- phyloseq(tax_table(gyrB.rel.phy), sample_data(gyrB.rel.phy),
+                     otu_table(gyrB.rel.phy, taxa_are_rows = FALSE), 
+                     refseq(gyrB.rel.phy), phy_tree(gyrB.tree))
+
+seed.pt.asv.df <- as.data.frame(dgyrB.pt@otu_table)
+seed.gyrB.tree <- phy_tree(dgyrB.pt)
 seed.gyrB.pd <- pd(seed.pt.asv.df,seed.gyrB.tree, include.root = T)
 
-seed.pt.meta <- as.data.frame(gyrB.rel.phy@sam_data)
+seed.pt.meta <- as.data.frame(dgyrB.pt@sam_data)
 seed.pt.meta %<>% data.frame()
 seed.pt.meta$Faiths_PD <- seed.gyrB.pd$PD
 seed.pt.meta$treatment <- factor(seed.pt.meta$treatment, levels = c("hand", "insect"))
@@ -141,13 +153,13 @@ Fig4B
 t.test(Faiths_PD~treatment, data = seed.pt.meta)
 
 #### compare community composition between treatments (Fig. 4C) ####
-seed.gyrB.uni <- seed.pt.rel %>% phyloseq::distance("wunifrac") %>% sqrt
+seed.gyrB.uni <- dgyrB.pt %>% phyloseq::distance("wunifrac") %>% sqrt
 seed.gyrB.nmds <- metaMDS(seed.gyrB.uni, trymax=200, parallel=10, k=2) 
 seed.gyrB.nmds.dat <- scores(seed.gyrB.nmds, display = "site") %>% data.frame %>% 
   rownames_to_column("sampID") %>%
   full_join(sample_data(seed.pt.rel) %>% data.frame %>% rownames_to_column("sampID"))
 
-seed.nmds.plot <- ggplot(seed.gyrB.nmds.dat,aes(x=NMDS1,y=NMDS2))+ 
+Fig4C <- ggplot(seed.gyrB.nmds.dat,aes(x=NMDS1,y=NMDS2))+ 
   geom_point(aes(color=treatment),size=5)+
   scale_color_discrete(type = c("#32648EFF","#74D055FF"),
                        labels=c("hand" = "Hand", "insect" = "Hand + bee"))+
@@ -158,7 +170,13 @@ seed.nmds.plot <- ggplot(seed.gyrB.nmds.dat,aes(x=NMDS1,y=NMDS2))+
         legend.title = element_text(size=30), legend.text = element_text(size=25),
         legend.position = "bottom") +
   guides(color = guide_legend(nrow = 2))
-seed.nmds.plot
+Fig4C
+
+# PerMANOVA
+seed.gyrB.dist <- dgyrB.pt %>% phyloseq::distance("wunifrac")  
+seed.perm <- adonis(seed.gyrB.dist~sample_data(dgyrB.pt)$treatment)
+print(seed.perm$aov.tab)
+
 #### visualize taxonomic composition in each treatment (Fig. S5A) ####
 
 #### visualize the differences in beta-dispersion between treatments (Fig. S5B) ####
