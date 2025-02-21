@@ -1,0 +1,9 @@
+Bacterial_inoc.,total_fruits_inoc.,fruits_success,fruits_fail,success_rate,failure_rate
+AcAAC001R,8,4,4,50,50
+AcM6R,7,4,3,57.14285714,42.85714286
+Erwinia,18,6,12,33.33333333,66.66666667
+Bacillus,16,6,10,37.5,62.5
+Paraburkholderia,12,4,8,33.33333333,66.66666667
+Rosenbergiella,4,4,0,100,0
+Microbacterium,4,4,0,100,0
+PBS_control,24,8,16,33.33333333,66.66666667
