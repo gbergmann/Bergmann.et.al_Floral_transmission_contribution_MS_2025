@@ -36,7 +36,15 @@ germ.plot <- seed.data %>%
         legend.title = element_text(size=15), legend.text = element_text(size=13))
 germ.plot 
 
-# 
+# calculating a contingency table and running chi-squared test of germination data
+germ.tab <- seed.data %>%
+  group_by(trt_strain) %>%
+  summarise(germ_avg = mean(germ_yes_percent)) %>%
+  mutate(no_germ_avg = 100-germ_avg) %>%
+  column_to_rownames(var = "trt_strain")
+
+chisq.test(germ.tab)
+chisq.posthoc.test(germ.tab, method = "bonferroni")
 
 #### visualization and statistics on seedling phenotypes ####
 pheno.plot <- seed.data %>%
@@ -53,11 +61,19 @@ pheno.plot <- seed.data %>%
         legend.title = element_text(size=15), legend.text = element_text(size=13))
 pheno.plot 
 
-#
+# calculating a contingency table and running chi-squared test of phenotype data
+pheno.tab <- seed.data %>%
+  group_by(trt_strain) %>%
+  summarise(pheno_avg = mean(normal_pheno_percent)) %>%
+  mutate(no_germ_avg = 100-pheno_avg) %>%
+  column_to_rownames(var = "trt_strain")
+
+chisq.test(pheno.tab)
+chisq.posthoc.test(pheno.tab, method = "bonferroni")
 
 #### combining plots for Fig 5B ####
 
 Fig5B <- ggarrange(germ.plot, pheno.plot, nrow = 1, common.legend = T)
 Fig5B
 
-# I had difficulty labelling strains in bold when they were used in both the stigma inoculation experiment and this experiment. As such, I manually re-labeled the strains with bold/normal text in Powerpoint when formatting the figures
+# I had difficulty labeling strains in bold when they were used in both the stigma inoculation experiment and this experiment. As such, I manually re-labeled the strains with bold/normal text in PowerPoint when formatting the figures
