@@ -15,6 +15,7 @@ slice.turbidity <- read.csv("data_raw/Stigma_inoc/single_strain_reisolation_Fiel
 fruit.abortion <- read.csv("data_raw/Stigma_inoc/single.strain_fruit.abortion_fieldMS.csv")
 
 #### Calculating average re-isolation frequency per slice, making top part of Fig. 5A ####
+# originally did these calculations manually in excel before plotting the averages in a heatmap in R. Generated this new code to streamline the calculation and visualization process. 
 slice.turbidity$slice <- factor(slice.turbidity$slice)
 
 # calculating average values for the heatmap
